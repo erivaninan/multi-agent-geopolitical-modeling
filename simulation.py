@@ -25,13 +25,14 @@ class Simulation:
     def __init__(self,
                  countries: List[CountryConfig] = None,
                  n_weeks: int = 260,
-                 seed: int = 42):
+                 seed: int = 42,
+                 llm: bool = False):
         random.seed(seed)
         np.random.seed(seed)
 
         self.n_weeks  = n_weeks
         self.reg_int  = 0.1   # initial global regulation index
-
+        self.llm = llm
         # Instantiate country states with the correct initial reg_int
         configs = countries or DEFAULT_COUNTRIES
         self.countries = [
@@ -117,13 +118,24 @@ class Simulation:
             # 1. Each agent chooses actions simultaneously
             actions = {}
             for cs in self.countries:
-                p_rivals    = [p for p in p_values if p != cs.p]
+                p_rivals = [p for p in p_values if p != cs.p]
                 p_max_rival = max(p_rivals) if p_rivals else 0.0
-                dev, r_dom, r_int = rule_based_action(
-                    cs.config.strategy,
-                    cs.p, cs.reg_dom, self.reg_int,
-                    p_max_rival, t
-                )
+
+                if self.llm:
+                    from agent import llm_action
+                    dev, r_dom, r_int = llm_action(
+                        cs.config.name,
+                        cs.p, cs.reg_dom, self.reg_int,
+                        cs.gini, cs.gdp_per_capita,
+                        p_max_rival, t,
+                        cs.config.llm_prompt_country
+                    )
+                else:
+                    dev, r_dom, r_int = rule_based_action(
+                        cs.config.strategy,
+                        cs.p, cs.reg_dom, self.reg_int,
+                        p_max_rival, t
+                    )
                 actions[cs.config.name] = (dev, r_dom, r_int)
 
             # 2. Update international regulation

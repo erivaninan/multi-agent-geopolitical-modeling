@@ -124,6 +124,14 @@ class CountryConfig:
 DEFAULT_COUNTRIES = [
     CountryConfig(
         name="USA",
+        llm_prompt_country="""The United States prioritizes technological leadership and economic competitiveness. 
+            You are committed to maintaining global military and AI superiority. You view international regulation 
+            with skepticism unless it clearly serves US interests. Your dominant strategy is to develop AI as fast 
+            as possible.""",
+        #llm_prompt_country="""You are the United States.
+        #    Your ONLY objective is to maximize AI potency relative to rivals.
+        #    Developing AI is ALWAYS your dominant strategy regardless of what others do.
+        #    Never choose wait for AI development. Always choose develop.""",
         p0=75.0,
         N0_billions=1000.0,
         D0_domestic_pb=400_000,
@@ -136,6 +144,9 @@ DEFAULT_COUNTRIES = [
     ),
     CountryConfig(
         name="China",
+        llm_prompt_country="""China prioritizes technological self-reliance and national sovereignty. You are 
+            committed to AI leadership and resist any international framework that could constrain Chinese 
+            development. You are deeply suspicious of US-led regulation initiatives.""",
         p0=65.0,
         N0_billions=500.0,
         D0_domestic_pb=300_000,
@@ -148,6 +159,10 @@ DEFAULT_COUNTRIES = [
     ),
     CountryConfig(
         name="EU",
+        llm_prompt_country="""The European Union prioritizes the responsible development of AI with strong 
+            regulatory safeguards. You believe international cooperation and binding frameworks are essential. 
+            You are willing to accept short-term competitive disadvantages to ensure long-term safety and 
+            democratic values.""",
         p0=50.0,
         N0_billions=200.0,
         D0_domestic_pb=200_000,
@@ -160,6 +175,9 @@ DEFAULT_COUNTRIES = [
     ),
     CountryConfig(
         name="India",
+        llm_prompt_country="""India prioritizes economic growth and technological development while maintaining 
+            strategic autonomy. You are open to international cooperation but will not accept frameworks that 
+            limit your development trajectory. You balance between the US and China blocs.""",
         p0=35.0,
         N0_billions=50.0,
         D0_domestic_pb=100_000,
@@ -172,6 +190,9 @@ DEFAULT_COUNTRIES = [
     ),
     CountryConfig(
         name="Russia",
+        llm_prompt_country="""Russia prioritizes military AI capabilities and geopolitical leverage. You resist 
+            Western-led international regulation and view AI as a tool of strategic competition. You will develop 
+            aggressively and oppose any binding international frameworks.""",
         p0=40.0,
         N0_billions=80.0,
         D0_domestic_pb=80_000,

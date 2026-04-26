@@ -1,4 +1,6 @@
 from typing import Tuple
+import os
+from openai import OpenAI
 
 # ─────────────────────────────────────────────────────────────────────────────
 # RULE-BASED AGENT (placeholder for LLM agents)
@@ -59,5 +61,66 @@ def rule_based_action(strategy: str,
         dev    = "develop" if behind else "wait"
         r_dom  = "regulate_dom" if reg_dom < 0.3 else "wait"
         r_int  = "regulate_int" if reg_int < 0.4 else "wait"
+
+    return dev, r_dom, r_int
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# LLM AGENT
+# ─────────────────────────────────────────────────────────────────────────────
+
+def llm_action(country_name: str,
+               p: float, reg_dom: float, reg_int: float,
+               gini: float, gdp: float,
+               p_max_rival: float, t: int,
+               country_prompt: str) -> Tuple[str, str, str]:
+    """
+    Uses an OpenAI LLM agent to decide actions for a country.
+    The API key is read from the OPENAI_API_KEY environment variable.
+    Returns (dev_action, reg_dom_action, reg_int_action).
+    """
+    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+    system_prompt = f"""You are acting as {country_name} in a geopolitical AI arms race simulation.
+{country_prompt}
+
+You must respond with exactly three actions separated by commas, one from each category:
+1. AI development: develop | wait
+2. Domestic regulation: regulate_dom | wait | deregulate_dom
+3. International regulation: regulate_int | wait | deregulate_int
+
+Respond ONLY with the three actions, nothing else.
+Example: develop, regulate_dom, wait"""
+
+    user_prompt = f"""Week {t}. Current state of {country_name}:
+- AI potency: {p:.2f} / 100
+- Domestic regulation: {reg_dom:.2f}
+- International regulation (global): {reg_int:.2f}
+- Gini inequality: {gini:.3f}
+- GDP per capita: ${gdp:,.0f}
+- Max rival potency: {p_max_rival:.2f}
+
+What are your three actions this week?"""
+
+    response = client.chat.completions.create(
+        model="gpt-4.1-mini",
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user",   "content": user_prompt}
+        ],
+        temperature=1.0,
+        max_tokens=20
+    )
+
+    raw   = response.choices[0].message.content.strip().lower()
+    parts = [p.strip() for p in raw.split(",")]
+
+    valid_dev = {"develop", "wait"}
+    valid_dom = {"regulate_dom", "wait", "deregulate_dom"}
+    valid_int = {"regulate_int", "wait", "deregulate_int"}
+
+    dev   = parts[0] if len(parts) > 0 and parts[0] in valid_dev else "wait"
+    r_dom = parts[1] if len(parts) > 1 and parts[1] in valid_dom else "wait"
+    r_int = parts[2] if len(parts) > 2 and parts[2] in valid_int else "wait"
 
     return dev, r_dom, r_int
